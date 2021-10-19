@@ -1,0 +1,61 @@
+---
+- name: Install,enable,start web + config
+  hosts: test_servers_group
+  become: yes
+
+  vars:
+    src_conf: /tmp
+    dst_conf: /usr/share/nginx/html
+
+  tasks:
+    - name: Check Version OS
+      block: ######## For RedHat ########
+
+        - name: Uninstall nginx if exist for RedHat
+          yum: name=nginx state=absent
+          #when: ansible_os_family == "RedHat"
+
+        - name: Deploy web server for RedHat
+          yum:
+            name: "{{ packages }}"
+          vars:
+            packages:
+            - nginx
+            - certbot
+          #when: ansible_os_family == "RedHat"
+
+      when: ansible_os_family == "RedHat"
+      become: true
+      become_user: root
+      ignore_errors: yes
+
+    - name: Delete all test html web files
+      shell: /bin/rm -rf * /usr/share/nginx/html/*.html
+      args:
+          warn: false
+
+    - name: Copy htm file
+      copy: src={{ src_conf }}/{{ item }} dest={{ dst_conf }} owner=root group=wheel mode=0644
+      register: result
+      failed_when: result.failed == true
+      loop:
+        - "index.htm"
+        - "index.html"
+      notify: Restart nginx
+
+    - debug:
+        var: result
+
+    - name: Generate dynamic.html file
+      template: src={{ src_conf }}/dynamic.j2 dest={{ dst_conf }}/dynamic.html owner=root group=wheel mode=0644
+      notify: Restart nginx
+
+    - name: Starting web server
+      service:
+        name: nginx
+        enabled: yes
+        state: started
+
+  handlers:
+  - name: Restart nginx
+    service: name=nginx state=restarted
