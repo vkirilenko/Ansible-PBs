@@ -1,0 +1,24 @@
+---
+- name: Deploy Jenkins CI
+hosts: jenkins_server
+remote_user: vagrant
+become: yesroles:
+  - geerlingguy.repo-epel
+  - geerlingguy.jenkins
+  - geerlingguy.git
+  - tecris.maven
+  - geerlingguy.ansible- name: Deploy Nexus Server
+hosts: nexus_server
+remote_user: vagrant
+become: yesroles:
+  - geerlingguy.java
+  - savoirfairelinux.nexus3-oss- name: Deploy Sonar Server
+hosts: sonar_server
+remote_user: vagrant
+become: yesroles:
+  - wtanaka.unzip
+  - zanini.sonar- name: On Premises CentOS
+hosts: app_server
+remote_user: vagrant
+become: yesroles:
+  - jenkins-keys-config
