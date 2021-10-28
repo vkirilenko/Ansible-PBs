@@ -1,0 +1,20 @@
+# Get RAW Token #
+# Replace "BAM" with your BAM IP or Hostname #
+    - name: Get Token
+      uri:
+        url: http://BAM/Services/REST/v1/login?username=< add username >username }}&password={{ password }}
+        headers: 
+          Accept-Encoding: gzip, deflate, br
+          Accept: application/json
+          Content-Type: application/x-www-form-urlencoded
+          User-Agent: Jakarta Commons-HttpClient/3.1
+          host: cloudsso.cisco.com
+          Connection: keep-alive
+          Content-Length: 0
+        method: GET
+        return_content: yes
+        validate_certs: no
+        force_basic_auth: yes
+        follow_redirects: yes
+        body_format: json
+      register: rawtoken

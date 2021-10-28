@@ -1,0 +1,20 @@
+# GET IP Network #
+# Replace BAM with your BAM IP or Hostname #
+    - name: GET Network Details
+      uri:
+        url: http://BAM/Services/REST/v1/searchByObjectTypes?count=100&start=0&types=IP4Network&keyword=< add keyword >
+        method: GET
+        headers: 
+          Authorization: "{{ token }}"
+          Cache-Control: no-cache
+          Accept-Encoding: gzip, deflate, br
+          Connection: keep-alive
+          Accept: application/json 
+        return_content: yes
+        validate_certs: no
+        force_basic_auth: yes
+        follow_redirects: yes
+      register: network
+      
+    - debug:
+      msg=”{{ network }}”

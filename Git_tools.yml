@@ -1,0 +1,14 @@
+# Git Add / Commit / Push
+- hosts: localhost
+  tasks:
+    - set_fact:
+        git_message: “Automated Release Update”
+    - name: Git - Add
+      shell: “git add ../*”
+      register: gitadd
+     - name: Git - Commit
+      shell: “git commit -am “{{ git_message }}”
+      register: git commit
+    - name: Git - Push
+      shell: “git push”
+      register: git push
