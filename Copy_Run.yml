@@ -1,0 +1,19 @@
+ # Create YAML file with Ansible Facts # 
+    - name: Create raw YAML
+      copy: 
+        content: | 
+          {{ network | to_nice_yaml }}
+        dest: ../myfiles/Network.yml
+        
+    - name: Set Device Fact
+        set_fact:
+          device_entity: “{{ device_id.json.queryResponse.entityID[0][‘$’] }}”   
+         
+     - name: Copy file with owner and permissions
+          ansible.builtin.copy:
+            src: /srv/myfiles/Network.yml
+            dest: /usr/bin/Network.yml
+            owner: foo
+            group: foo
+            mode: '0644'      
+        

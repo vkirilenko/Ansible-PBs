@@ -1,0 +1,22 @@
+# IOS
+- hosts: IOS
+  vars_prompt:
+  
+    - name: IOS_User_Prompt
+      prompt: “Enter Cisco IOS Username”
+      private: no
+
+    - name: IOS_Password_Prompt
+      prompt: “Enter IOS Password”
+      private: yes
+
+# Register Username and Password
+    - set_fact:
+        ios_user: “{{ IOS_User_Prompt }}”
+        ios_password: “{{ IOS_Password_Prompt }}”
+        
+# Copy Run Start
+    - name: Write Mem
+      ios_command:
+        commands:
+          - “copy run start\n\n”
