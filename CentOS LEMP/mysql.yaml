@@ -1,0 +1,53 @@
+# MySQL install
+
+---
+- hosts: "all"
+  become: true
+  tasks: 
+    - name: "MySQL install"
+      ansible.builtin.yum:
+        name: "mysql-server"
+        state: "present"
+        update_cache: true
+
+    - name: "Install PyMySql"
+      ansible.builtin.yum:
+        name: "python3-PyMySQL"
+        state: "latest"
+        update_cache: true
+
+    - name: "Start the MySQL service" 
+      ansible.builtin.service: 
+        name: "mysqld"
+        state: "started"    
+    
+    - name: "Create root"
+      community.mysql.mysql_user:
+        name: "root"
+        password: "password"
+        login_user: "root"
+        login_password: "password"
+        check_implicit_admin: true
+
+    - name: "Copy .my.cnf file with root password credentials"
+      ansible.builtin.copy: 
+        src: "/home/vladimir/Templates/root/my.cnf.j2" 
+        dest: "/root/.my.cnf" 
+        owner: "root"
+        mode: "0600"
+
+    - name: "Remove anonymous users"
+      community.mysql.mysql_user:
+        name: "" 
+        state: "absent" 
+        login_user: "root"
+        login_password: "password"
+
+    - name: "Remove test database"
+      community.mysql.mysql_db: 
+        name: "test" 
+        state: "absent" 
+        login_user: "root"
+        login_password: "password"        
+
+...  

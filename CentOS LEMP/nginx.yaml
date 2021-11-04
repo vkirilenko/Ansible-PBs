@@ -1,0 +1,30 @@
+# Nginx install
+
+---
+- hosts: "all"
+  become: true
+  tasks:
+    - name: "nginx get and install"
+      ansible.builtin.yum:
+        name: "nginx"
+        state: "present"
+        update_cache: true
+
+    - name: "Make sure nginx is running"
+      ansible.builtin.systemd:        
+        name: "nginx"
+        state: "started"
+
+
+    - name: "clean /usr/share/nginx/ (or /var/www/html/ if you need it)"
+      ansible.builtin.file:
+        path: "/usr/share/nginx/"
+        state: "absent"
+
+    - name: "add www template"
+      ansible.builtin.copy:
+        src: "/home/vladimir/Documents/html"
+        dest: "/usr/share/nginx/"
+        owner: "vladimir"
+        mode: "0644"
+...

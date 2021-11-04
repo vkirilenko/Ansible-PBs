@@ -1,0 +1,28 @@
+---
+- hosts: all
+  tasks:
+            
+    - name: Test for running nginx
+      shell: ps -C nginx
+      register: test_running_nginx
+      changed_when: False
+      debug:
+        msg: "{{ nginx_config_status.rc }}"
+      tags: restart-nginx
+      
+    - name: First check the configuration
+      shell: /usr/sbin/nginx -t
+      register: test_nginx_config
+      when: test_running_nginx.stdout != ""
+      changed_when: False
+      ignore_errors: True
+      tags: restart-nginx
+          
+    - name: Restart nginx
+      service: 
+        name: nginx 
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      when: test_running_nginx.stdout != "" and test_nginx_config.rc == 0
+      tags: restart-nginx
