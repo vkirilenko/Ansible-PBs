@@ -1,0 +1,61 @@
+# PHP 
+
+---
+
+- name: "Install & run php packets"
+  hosts: all
+  tasks:
+
+  # - name: Unarchive a file that needs to be downloaded
+    # ansible.builtin.unarchive:
+      # src: https://example.com/php.tar.gz
+      # dest: /home/<username>/Documents>  # *** change user name! ***
+      # remote_src: yes
+
+    - name: "Installing php, php-mysqlnd, php-fpm"
+      ansible.builtin.yum: 
+        name: "{{ item }}"
+        state: "latest"
+        update_cache: true
+      with_items:
+      - "php"
+      - "php-mysqlnd"
+      - "php-fpm"
+     
+    - name: "Copy php files to /var/www"
+      ansible.builtin.copy:
+        src: "/home/<username>/Documents/php/php_test"  # *** change user name! ***
+        dest: "/var/www/"
+        owner: "<username>"  # *** change user name! ***
+        group: "<username>"  # *** change user name! ***
+        mode: "0644"
+
+    - name: "Create directory for nginx"
+      ansible.builtin.file:
+        dest: "{{ item }}"
+        state: "directory"
+      with_items:
+      - "/etc/nginx/sites-available/"
+      - "/etc/nginx/sites-enabled/"
+
+    - name: "Copy nginx config for testing"
+      ansible.builtin.copy:
+        src: "/home/<username>/Documents/php/nginx.conf"  # *** change user name! ***
+        dest: "/etc/nginx/sites-available/php_test.conf"
+        owner: "<username>"  # *** change user name! ***
+        group: "<username>"  # *** change user name! ***
+        mode: "0644"
+
+    - name: "Link folders"
+      ansible.builtin.file:
+        src: "/etc/nginx/sites-available/php_test.conf"
+        dest: "/etc/nginx/sites-enabled/php_test"
+        state: "link" 
+
+    - name: "Reload nginx"
+      ansible.builtin.service:
+        name: "nginx"
+        state: "reloaded"
+
+...
+

@@ -1,4 +1,4 @@
-# Nginx install
+# Nginx 
 
 ---
 - hosts: "all"
@@ -14,6 +14,7 @@
       ansible.builtin.systemd:        
         name: "nginx"
         state: "started"
+        enabled: "yes"
 
 
     - name: "clean /usr/share/nginx/ (or /var/www/html/ if you need it)"
@@ -23,8 +24,8 @@
 
     - name: "add www template"
       ansible.builtin.copy:
-        src: "/home/vladimir/Documents/html"
+        src: "/home/<username>/Documents/html" # "html is any start page  *** change user name! ***
         dest: "/usr/share/nginx/"
-        owner: "vladimir"
+        owner: "<username>" # *** change user name! ***
         mode: "0644"
 ...

@@ -1,4 +1,4 @@
-# MySQL install
+# MySQL 
 
 ---
 - hosts: "all"
@@ -31,7 +31,7 @@
 
     - name: "Copy .my.cnf file with root password credentials"
       ansible.builtin.copy: 
-        src: "/home/vladimir/Templates/root/my.cnf.j2" 
+        src: "/home/<username>/Templates/root/my.cnf.j2" # *** change user name! ***
         dest: "/root/.my.cnf" 
         owner: "root"
         mode: "0600"
