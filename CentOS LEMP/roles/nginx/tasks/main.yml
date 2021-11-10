@@ -1,9 +1,4 @@
-# Nginx 
 
----
-- hosts: "all"
-  become: true
-  tasks:
     - name: "nginx get and install"
       ansible.builtin.yum:
         name: "nginx"
@@ -28,4 +23,3 @@
         dest: "/usr/share/nginx/"
         owner: "<username>" # *** change user name! ***
         mode: "0644"
-...

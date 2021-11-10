@@ -1,10 +1,3 @@
-# PHP 
-
----
-
-- name: "Install & run php packets"
-  hosts: all
-  tasks:
 
   # - name: Unarchive a file that needs to be downloaded
     # ansible.builtin.unarchive:
@@ -24,7 +17,7 @@
      
     - name: "Copy php files to /var/www"
       ansible.builtin.copy:
-        src: "/home/<username>/Documents/php/php_test"  # *** change user name! ***
+        src: "/files/php/php_test"  # *** change user name! ***
         dest: "/var/www/"
         owner: "<username>"  # *** change user name! ***
         group: "<username>"  # *** change user name! ***
@@ -40,7 +33,7 @@
 
     - name: "Copy nginx config for testing"
       ansible.builtin.copy:
-        src: "/home/<username>/Documents/php/nginx.conf"  # *** change user name! ***
+        src: "/files/php/nginx.conf"  # *** change user name! ***
         dest: "/etc/nginx/sites-available/php_test.conf"
         owner: "<username>"  # *** change user name! ***
         group: "<username>"  # *** change user name! ***
@@ -51,11 +44,4 @@
         src: "/etc/nginx/sites-available/php_test.conf"
         dest: "/etc/nginx/sites-enabled/php_test"
         state: "link" 
-
-    - name: "Reload nginx"
-      ansible.builtin.service:
-        name: "nginx"
-        state: "reloaded"
-
-...
 

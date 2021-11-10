@@ -1,0 +1,24 @@
+- hosts: onehost
+  tasks:
+    - command: "/bin/echo 'this is a test' "
+      register: "foo"
+
+
+- hosts: anotherhost
+  tasks:
+    - debug: 
+        var: "foo"
+      when: foo is defined
+
+    - debug: 
+        var: "hostvars['onehost']['foo']"
+      when: hostvars['onehost']['foo'] is defined
+      
+
+# Get POSTFIX string with IP for group from another group      
+# - set_fact: 
+    # nodelist: {%for host in groups['mail']%}
+                # {{hostvars[host].ansible_host}}
+                  # {% if not loop.last %},
+                  # {% endif %}
+                # {% endfor %}

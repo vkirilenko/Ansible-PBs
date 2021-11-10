@@ -1,9 +1,4 @@
-# MySQL 
 
----
-- hosts: "all"
-  become: true
-  tasks: 
     - name: "MySQL install"
       ansible.builtin.yum:
         name: "mysql-server"
@@ -49,5 +44,3 @@
         state: "absent" 
         login_user: "root"
         login_password: "password"        
-
-...  
