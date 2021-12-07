@@ -1,0 +1,25 @@
+# From https://rtfm.co.ua/ansible-modul-community-kubernetes-i-ustanovka-helm-charta-s-externaldns/
+
+- name: "Install Ansible community.kubernetes plugin"
+  command: "ansible-galaxy collection install community.kubernetes"
+
+- name: "Add Bitnami chart repo"
+  community.kubernetes.helm_repository:
+    name: "bitnami"
+    repo_url: "https://charts.bitnami.com/bitnami"
+
+- name: "Deploy ExternalDNS chart inside {{ eks_env }}-devops-external-dns-ns namespace (and create it)"
+  community.kubernetes.helm:
+    kubeconfig: "{{ kube_config_path }}"
+    name: "external-dns"
+    chart_ref: "bitnami/external-dns"
+    release_namespace: "{{ eks_env }}-devops-external-dns-ns"
+    create_namespace: true
+    values:
+      domainFilters:
+      - example.com
+      aws:
+        credentials:
+          accessKey: "{{ external_dns_iam_user_access_key }}"
+          secretKey: "{{ external_dns_iam_user_secret_key }}"
+        assumeRoleArn: "{{ external_dns_iam_role_arn }}"

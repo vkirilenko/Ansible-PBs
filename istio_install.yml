@@ -1,0 +1,52 @@
+# From https://rtfm.co.ua/istio-ustanovka-s-ansible-i-helm/
+
+...
+- role: istio
+    tags: istio, create-cluster
+      
+- name: "Download Istio Latest Git-repo"
+    shell: "curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.9.1 sh -"
+
+- command: "ls istio-1.9.1"
+    register: dir_out
+
+- debug: var={{ item }}
+    with_items: dir_out.stdout_lines
+    
+- name: "Download Istio Latest Git-repo"
+    shell: "curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.9.1 sh -"
+
+- name: "Install Istio Base to the istio-system namespace"
+    community.kubernetes.helm:
+      kubeconfig: "{{ kube_config_path }}"
+      name: "istio-base"
+      chart_ref: "istio-1.9.1/manifests/charts/base"
+      release_namespace: "istio-system"
+      create_namespace: true
+      values:
+        global:
+          istiod:
+            enableAnalysis: true
+            
+- name: "Install Istio Discovery to the istio-system namespace"
+    community.kubernetes.helm:
+      kubeconfig: "{{ kube_config_path }}"
+      name: "istiod"
+      chart_ref: "istio-1.9.1/manifests/charts/istio-control/istio-discovery"
+      release_namespace: "istio-system"
+      create_namespace: true
+      
+- name: "Install Istio Ingress Gateway to the istio-system namespace"
+    community.kubernetes.helm:
+      kubeconfig: "{{ kube_config_path }}"
+      name: "istio-ingress"
+      chart_ref: "istio-1.9.1/manifests/charts/gateways/istio-ingress"
+      release_namespace: "istio-system"
+      create_namespace: true
+      values:
+        gateways:
+          istio-ingressgateway:
+            serviceAnnotations:
+              alb.ingress.kubernetes.io/healthcheck-path: /healthz/ready
+              alb.ingress.kubernetes.io/healthcheck-port: "30218"
+            type: "NodePort"
