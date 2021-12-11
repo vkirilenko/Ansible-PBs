@@ -1,0 +1,45 @@
+start services:
+  - name: Start services
+    systemd:
+      name: "{{ item.name }}@{{ item.service_env }}"
+      state: started
+      enabled: yes
+      daemon_reload: yes
+    when: item.started is defined and item.started
+    loop: '{{ my_own_services_list | flatten(1) }}'
+my_own_services_list:
+  - name: api3
+    version: -514-03d2c4f.el7
+    service_env: region_master
+    started: true
+  - name: roasted
+    version: -295-03d2c4f.el7
+    service_env: region_slave
+    move_datadir: true
+  - name: my_name_for_server
+    service_env: region_master
+    started: true
+    systemd_dropins:
+      - name: exec
+        content: |
+          [Service]
+          ExecStart=
+          ExecStart=/usr/bin/my_name_for_server --per-batch 50
+deploy stage:
+    stage: deploy
+    image: ...
+    only:
+      - develop
+    before_script:
+      - ansible-galaxy install -r ./ansible/requirements.yml
+    script:
+      - ansible-playbook -i ansible/inventories/stage/ ansible/playbooks/deploy.yml
+deploy prod:
+    stage: deploy
+    image: ...
+    only:
+      - tags
+    before_script:
+      - ansible-galaxy install -r ./ansible/requirements.yml
+    script:
+      - ansible-playbook -i ansible/inventories/prod/ ansible/playbooks/deploy.yml

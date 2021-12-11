@@ -1,0 +1,53 @@
+- name: CLI command
+  hosts: all
+  become: yes
+
+  vars:
+    executing_shell_commands:
+      - echo "test command one"
+      - echo "test command two"
+
+  tasks:
+     - name: Execution {{ executing_shell_commands }} command
+       shell: "{{ item }}"
+       loop: "{{ executing_shell_commands }}"
+       register: shell_output
+       changed_when: False
+
+     - debug:
+         msg: "{{ shell_output.results|map(attribute='stdout')|list }}"
+         
+- name: Manage yum repository
+  hosts: all
+  become: yes
+
+  vars:
+    manage_yum_repository: []
+    manage_yum_repository_other: []
+
+  tasks:
+
+    - name: Manage yum repository
+      yum_repository:
+        name:     "{{ item.name }}"
+        baseurl:  "{{ item.baseurl }}"
+        description: "{{ item.description | default(omit, True) }}"
+        gpgkey:   "{{ item.gpgkey | default(omit, True) }}"
+        gpgcheck: "{{ item.gpgcheck | default('no') }}"
+        repo_gpgcheck: "{{ item.repo_gpgcheck | default(omit, True) }}"
+        state: "{{ item.state | default('present') }}"
+        username: "{{ item.username | default(omit, True) }}"
+        password: "{{ item.password | default(omit, True) }}"
+        file: "{{ item.file | default(omit, True) }}"
+        enabled: "{{ item.enabled | default('yes') }}"
+      loop: "{{ ( manage_yum_repository | default([]) ) + ( manage_yum_repository_other | default([]) ) }}"
+
+- name: restart airflow
+    docker_container:
+      name: "{{ airflow_docker__base_container_name }}-{{ airflow_docker__service.key }}"
+      restart: yes
+    loop: "{{ lookup('dict', airflow_docker__services) }}"
+    loop_control:
+      loop_var: "airflow_docker__service"
+      label: "{{ airflow_docker__base_container_name }}-{{ airflow_docker__service.key }}"
+    when: airflow_docker__service.value
