@@ -1,0 +1,52 @@
+---
+
+- name: Manage user accounts and  groups
+  user:
+    name:     "{{ item.username }}"
+    password: "{{ item.password }}"
+    comment:  "{{ item.comment | default(omit, True) }}"
+    shell:    "{{ item.shell | default(omit, True) }}"
+    groups:   "{{ item.groups | default(omit,True) }}"
+    system:   "{{ item.system | default(omit,True) }}"
+    uid: "{{ item.uid | default(omit, True) }}"
+    ssh_key: "{{ item.key }}"
+    state: "{{ item.user_state | default(omit, True) }}"
+  loop: "{{ (manage_users | default([]) ) + (manage_users_for_group | default([]) ) + (manage_users_other | default([]) ) }}"
+
+- name: Block add or delete file to sudoers.d
+  block:
+
+    - name: Create sudo file nopasswd
+      copy:
+        dest: "/etc/sudoers.d/10-{{ item.username }}"
+        content: |
+          {{ item.username }}   ALL=(ALL) NOPASSWD:ALL
+        validate: '/usr/sbin/visudo -cf %s'
+      when: (item.sudo_nopasswd is defined) and (item.use_sudo|bool) and (item.sudo_nopasswd|bool)
+      loop: "{{ (manage_users | default([]) ) + (manage_users_for_group | default([]) ) + (manage_users_other | default([]) ) }}"
+
+    - name: Create sudo file
+      copy:
+        dest: "/etc/sudoers.d/10-{{ item.username }}"
+        content: |
+          {{ item.username }}   ALL=(ALL) ALL
+        validate: '/usr/sbin/visudo -cf %s'
+      when:
+        - item.use_sudo|bool
+      loop: "{{ (manage_users | default([]) ) + (manage_users_for_group | default([]) ) + (manage_users_other | default([]) ) }}"
+
+    - name: Delete sudo file
+      file:
+        path: "/etc/sudoers.d/10-{{ item.username }}"
+        state: absent
+      when: (item.use_sudo|bool == False)
+      loop: "{{ (manage_users | default([]) ) + (manage_users_for_group | default([]) ) + (manage_users_other | default([]) ) }}"
+  when: ( item.use_sudo is defined )
+
+- name: Set authorized key
+  authorized_key:
+     user: "{{ manage_users.username }}"
+     state: present
+     key: "{{ manage_users | map(attribute='ssh_key')|join('\n') }}"
+  when: (manage_users.ssh_key is defined)
+loop: "{{ (manage_users | default([]) ) + (manage_users_for_group | default([]) ) + (manage_users_other | default([]) ) }}"
